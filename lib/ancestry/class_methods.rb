@@ -217,7 +217,7 @@ module Ancestry
     end
 
     def scoped_where
-      self.ancestry_base_class
+      yield self.ancestry_base_class
     end
 
     ANCESTRY_UNCAST_TYPES = [:string, :uuid, :text].freeze
