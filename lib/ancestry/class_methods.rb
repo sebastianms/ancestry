@@ -185,13 +185,22 @@ module Ancestry
     end
 
     # Rebuild depth cache if it got corrupted or if depth caching was just turned on
-    def rebuild_depth_cache!
+    def rebuild_depth_cache!(opts={})
       raise Ancestry::AncestryException.new("Cannot rebuild depth cache for model without depth caching.") unless respond_to? :depth_cache_column
 
       self.ancestry_base_class.transaction do
-        unscoped_where do |scope|
+        if opts[:scoped]
+          objects = scoped_where
+        else
+          objects = unscoped_where
+        end
+        objets.each do |scope|
           scope.find_each do |node|
-            node.update_attribute depth_cache_column, node.depth
+            if opts[:skip_callbacks]
+              node.update_column depth_cache_column, node.depth
+            else
+              node.update_attribute depth_cache_column, node.depth
+            end
           end
         end
       end
@@ -205,6 +214,10 @@ module Ancestry
       else
         yield self.ancestry_base_class.unscope(:where)
       end
+    end
+
+    def scoped_where
+      self.ancestry_base_class
     end
 
     ANCESTRY_UNCAST_TYPES = [:string, :uuid, :text].freeze
