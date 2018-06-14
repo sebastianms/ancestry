@@ -194,7 +194,7 @@ module Ancestry
         else
           objects = unscoped_where
         end
-        objets.each do |scope|
+        objects.each do |scope|
           scope.find_each do |node|
             if opts[:skip_callbacks]
               node.update_column depth_cache_column, node.depth
