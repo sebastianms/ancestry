@@ -189,12 +189,7 @@ module Ancestry
       raise Ancestry::AncestryException.new("Cannot rebuild depth cache for model without depth caching.") unless respond_to? :depth_cache_column
 
       self.ancestry_base_class.transaction do
-        if opts[:scoped]
-          objects = scoped_where
-        else
-          objects = unscoped_where
-        end
-        objects do |scope|
+        unscoped_where do |scope|
           scope.find_each do |node|
             if opts[:skip_callbacks]
               node.update_column depth_cache_column, node.depth
@@ -213,12 +208,6 @@ module Ancestry
         end
       else
         yield self.ancestry_base_class.unscope(:where)
-      end
-    end
-
-    def scoped_where
-      self.ancestry_base_class do
-        yield self.ancestry_base_class
       end
     end
 
